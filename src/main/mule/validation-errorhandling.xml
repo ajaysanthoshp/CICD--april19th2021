@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="cf75dbc8-209b-4680-80e3-18d478ec1827" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<validation:config name="Validation_Config" doc:name="Validation Config" doc:id="756f061b-7e2c-48b4-afc1-66ca3610da36" />
+	<flow name="validation-errorhandlingFlow" doc:id="6437b00b-028f-407a-a7d1-8bf5c0a07b10" >
+		<http:listener doc:name="Listener" doc:id="96a959d2-9545-4947-a28b-dcec8cef5b8e" config-ref="HTTP_Listener_config" path="/validationerror" allowedMethods="GET"/>
+		<set-payload value="Initial payload" doc:name="Initial payload" doc:id="9889511f-93eb-4d27-98b7-774cbdec88f9" />
+		<flow-ref doc:name="Flow Reference" doc:id="7b23adb5-b3de-425b-8793-061dfd928a0f" name="ChildFlow"/>
+		<set-payload value="End Payload" doc:name="End Payload" doc:id="b3dffe68-ad21-408c-87e5-c765bd95c5a4" />
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="4723562c-9978-43b1-8f23-37668c14003d" >
+				<set-payload value="Error Payload" doc:name="Error Payload" doc:id="cd7be3be-86fe-4c71-a304-c393375429e6" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="ChildFlow" doc:id="744e5e3c-a6aa-4b54-b8d2-8914c5c8a0d2" >
+		<validation:is-null doc:name="Is null" doc:id="4075bb3a-f3d7-411d-88f5-a8013d1be851" config-ref="Validation_Config" value="#[payload]"/>
+		<set-payload value="Child Payload" doc:name="Child Payload" doc:id="7c07a84b-7eba-4566-a81a-fa3da3808936" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="817522cd-dd92-4807-8372-1bfb244636d4" >
+				<set-payload value="child flow Error" doc:name="child flow Error" doc:id="f6d71dc3-9754-4c2b-9bc2-5bb92c03d5f8" />
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>
